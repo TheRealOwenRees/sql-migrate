@@ -22,7 +22,7 @@ export default class {
     }
 
     static async createConfigFile() {
-        const filePath = process.cwd() + '/vortexconfig.json';
+        const filePath = path.join(process.cwd(), 'vortexconfig.js');
 
         if (fs.existsSync(filePath)) {
             const { override } = await inquirer.prompt({
@@ -36,9 +36,9 @@ export default class {
             }
         }
 
-        fs.writeFileSync(filePath, JSON.stringify(Configuration.getDefaultConfig(), null, 4));
-
-        console.log('Config file created: vortexconfig.json. Modify it to your needs!');
+        const configContent = `export const vortexConfig = ${JSON.stringify(Configuration.getDefaultConfig(), null, 4)};`;
+        fs.writeFileSync(filePath, configContent, "utf8");
+        console.log('Config file created: vortexconfig.js. Modify it to your needs!');
     }
 
     static async summary() {
@@ -68,8 +68,9 @@ export default class {
         console.table(summary);
     }
 
-    static init() {
-        const { migrationsHistorySavingStrategy } = Configuration.getConfiguration();
+    static async init() {
+        const config = await Configuration.getConfiguration();
+        const { migrationsHistorySavingStrategy } = config;
 
         switch (migrationsHistorySavingStrategy) {
             case 'filesystem':
@@ -161,7 +162,8 @@ Are you sure?`;
         }
     }
 
-    static createNew(isMjs = false) {
+    static async createNew(isMjs = false) {
+        try {
         const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
         const template = path.join(__dirname + '/../data/migration.template.js');
@@ -169,11 +171,18 @@ Are you sure?`;
         const fileExt = isMjs ? '.mjs' : '.js';
 
         const newMigrationFileName = Date.now() + fileExt;
-        const migrationFilePath = path.join(FileSystemRepository.getMigrationFolderPath(), '/' + newMigrationFileName);
+
+        const migrationsFolderPath = await FileSystemRepository.getMigrationFolderPath()
+        const migrationFilePath = path.join(migrationsFolderPath, '/' + newMigrationFileName);
 
         fs.writeFileSync(migrationFilePath, content);
 
         console.log('Created a new migration: ' + newMigrationFileName);
+        process.exit(0);
+        } catch (err) {
+            console.error(err);
+            process.exit(1);
+        }
     }
 
     static finish() {

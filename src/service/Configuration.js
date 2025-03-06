@@ -1,4 +1,10 @@
-import fs from 'fs';
+import path from 'path';
+import dotenv from "dotenv";
+
+const envFile = `.env.${process.env.NODE_ENV || "development"}`;
+dotenv.config({ path: envFile });
+
+const configPath = path.join(process.cwd(), "vortexconfig.js");
 
 export default class {
     static getMainFolderLocation() {
@@ -19,10 +25,10 @@ export default class {
         };
     }
 
-    static getConfiguration() {
-        const config = JSON.parse(fs.readFileSync(this.getMainFolderLocation() + '/vortexconfig.json').toString());
+    static async getConfiguration() {
+        const { vortexConfig } = await import(configPath);
+        const config = JSON.parse(JSON.stringify(vortexConfig))
         this.validateConfiguration(config);
-
         return config;
     }
 

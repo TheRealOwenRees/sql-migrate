@@ -5,14 +5,15 @@ import Configuration from "./Configuration.js";
 import Migration from "../lib/Migration.js";
 
 export default class {
-    static getMigrationFolderPath() {
-        return process.cwd() + '/' + Configuration.getConfiguration().migrationsLocation;
+    static async getMigrationFolderPath() {
+        const config = await Configuration.getConfiguration();
+        return process.cwd() + '/' + config.migrationsLocation;
     }
 
-    static initMigrationsFolder() {
+    static async initMigrationsFolder() {
         const mainFolderLocation = Configuration.getMainFolderLocation();
-        const wantedMigrationsLocation = Configuration.getConfiguration().migrationsLocation;
-
+        const config = await Configuration.getConfiguration();
+        const wantedMigrationsLocation = config.migrationsLocation;
         const migrationsPath = path.join(mainFolderLocation, wantedMigrationsLocation);
 
         if (fs.existsSync(migrationsPath) === false) {
@@ -46,7 +47,7 @@ export default class {
      * @returns {Promise<Migration[]>}
      */
     static async getMigrations() {
-        const folderPath = this.getMigrationFolderPath();
+        const folderPath = await this.getMigrationFolderPath();
 
         const migrationsPaths = fs.readdirSync(folderPath)
             .filter((file) => file.match(/\^*(\.m?(js))$/))

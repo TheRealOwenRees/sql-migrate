@@ -1,4 +1,6 @@
+/.idea
 .vortex
 migrations
 node_modules
 vortexconfig.json
+vortexconfig.js

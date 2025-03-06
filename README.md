@@ -24,7 +24,7 @@ npm install vortexql
 
 After that, you can use the Command-Line Interface (CLI) using either
 - `vortex`
-- `./node_modules/bin/vortex`
+- `./node_modules/.bin/vortex`
 
 Simply use `vortex` or `vortex help` to display the help message, it contains all the available commands.
 
@@ -32,7 +32,7 @@ You can generate a configuration file using the `vortex init` command.
 
 ### Configuration
 
-After running `vortex init`, you'll see a new file in your root directory called `vortexconfig.json`.
+After running `vortex init`, you'll see a new file in your root directory called `vortexconfig.js`.
 
 This file will look like this:
 ```json

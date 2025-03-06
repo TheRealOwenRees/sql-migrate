@@ -1,4 +1,4 @@
-import mysql from 'mysql2';
+import mysql from 'mysql2/promise';
 
 import Configuration from './Configuration.js';
 import Migration from "../lib/Migration.js";
@@ -6,9 +6,10 @@ import Migration from "../lib/Migration.js";
 let instance = null
 
 export default class {
-    static getInstance() {
+    static async getInstance() {
         if (instance === null) {
-            const databaseConfig = Configuration.getConfiguration().database;
+            const config = await Configuration.getConfiguration();
+            const databaseConfig = config.database;
 
             instance = mysql.createConnection(databaseConfig);
         }
@@ -16,21 +17,16 @@ export default class {
         return instance;
     }
 
-    static executeQuery(query) {
-        return new Promise((resolve, reject) => {
-            this.getInstance().query(query, (err, results) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                return resolve(results);
-            })
-        })
+    static async executeQuery(query) {
+        const connection = await this.getInstance();
+        const [results] = await connection.execute(query); // Use the promise-based execute
+        return results;
     }
 
-    static end() {
+    static async end() {
         if (instance !== null) {
-            this.getInstance().end();
+            const connection = await this.getInstance();
+            await connection.end(); // This should work with promise-based connections
         }
     }
 
